@@ -1,17 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { useGlobalContext } from "../context/GlobalContext";
 import { _axios } from "../lib/axios";
 
-export default function LoginPage() {
+export default function RegisterPage() {
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
     password: "",
   });
-
-  const navigate = useNavigate();
-
-  const { setUser } = useGlobalContext();
 
   const handleChange = (e) => {
     setFormData({
@@ -20,36 +18,43 @@ export default function LoginPage() {
     });
   };
 
-  async function handleLogin(e) {
+  async function handleRegister(e) {
     e.preventDefault();
 
     try {
-      const res = await _axios.post("/user/login", formData);
+      const res = await _axios.post("/user/register", formData);
 
       if (res.data.status) {
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("user", JSON.stringify(res.data.user));
-        setUser(res.data.user);
-        alert("Login successful");
-        window.location.href = "/";
+        alert("Registration successful. Please login.");
+        window.location.href = "/login";
       } else {
-        alert("Invalid email or password");
+        alert(res.data.message || "Registration failed.");
       }
     } catch (error) {
       console.log(error);
-      alert(error.response.data.message);
+      alert(error.response?.data?.message || "Something went wrong!");
     }
   }
 
   return (
     <div>
-      <h1>Login Page</h1>
-
-      <form onSubmit={handleLogin}>
+      <h1>Register Page</h1>
+      <form onSubmit={handleRegister}>
+        <div>
+          <label htmlFor="name">Name</label> <br />
+          <input
+            type="text"
+            name="name"
+            required
+            onChange={handleChange}
+            value={formData.name}
+          />
+        </div>{" "}
+        <br />
         <div>
           <label htmlFor="email">Email</label> <br />
           <input
-            type="text"
+            type="email"
             name="email"
             required
             onChange={handleChange}
@@ -68,9 +73,9 @@ export default function LoginPage() {
           />
         </div>{" "}
         <br />
-        <button type="submit">Login</button>
-        <button type="button" onClick={() => navigate("/register")}>
-          Register
+        <button type="submit">Register</button>
+        <button type="button" onClick={() => navigate("/login")}>
+          Login
         </button>
       </form>
     </div>
